@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Command - System Architecture</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module">
+      import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+      mermaid.initialize({ startOnLoad: true, theme: 'dark', fontFamily: 'Inter, sans-serif' });
+    </script>
+    <style>
+        body { background-color: #09090b; color: #f4f4f5; font-family: 'Inter', sans-serif; }
+        .mermaid-container {
+            background-color: #0d0d12;
+            border: 1px solid #27272a;
+            border-radius: 12px;
+            padding: 24px;
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen p-8 lg:p-16">
+    <div class="max-w-6xl mx-auto space-y-12">
+        <!-- Header -->
+        <header class="text-center space-y-4">
+            <h1 class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-indigo-400 via-sky-400 to-emerald-400 bg-clip-text text-transparent">
+                System Architecture & Data Flow
+            </h1>
+            <p class="text-zinc-400 text-lg max-w-2xl mx-auto">
+                Comprehensive technical overview of Nexus Command's data pipelines, from Python optical edge detection to local LLM decision routing.
+            </p>
+        </header>
+
+        <!-- Mermaid Diagram -->
+        <section class="mermaid-container shadow-2xl shadow-indigo-500/10 overflow-x-auto">
+            <div class="mermaid">
+                flowchart TD
+                    classDef hardware fill:#18181b,stroke:#a1a1aa,stroke-width:1px,color:#fff
+                    classDef python fill:#1e1b4b,stroke:#8b5cf6,stroke-width:2px,color:#fff
+                    classDef core fill:#0f172a,stroke:#3b82f6,stroke-width:2px,color:#fff
+                    classDef ai fill:#451a03,stroke:#f59e0b,stroke-width:2px,color:#fff
+                    classDef ui fill:#022c22,stroke:#10b981,stroke-width:2px,color:#fff
+
+                    subgraph Step1 ["1. Edge Infrastructure (Python/C++)"]
+                        CAM(CCTV Cameras / Sensors):::hardware
+                        YOLO(YOLOv8 Inference Engine):::python
+                        CV(Optical Flow & Anomaly Detection):::python
+                        
+                        CAM -->|"Live Video Stream (RTSP)"| YOLO
+                        YOLO -->|"Bounding Boxes"| CV
+                    end
+                    
+                    subgraph Step2 ["2. Core Aggregation Layer (TypeScript/Vite)"]
+                        STREAM(Real-Time Event Streamer):::core
+                        DB[(Volatile Memory / Redis)]:::core
+                        
+                        CV -->|"JSON (Avg Speed, Anomaly, Count)"| STREAM
+                        STREAM <--> DB
+                    end
+
+                    subgraph Step3 ["3. Intelligence Synthesis (Local API)"]
+                        OLLAMA(Ollama Server Manager):::ai
+                        LLM(Llama 3 Foundation Model):::ai
+                        
+                        STREAM -->|"CRITICAL Threshold Exceeded (Prompt + Weather Context)"| OLLAMA
+                        OLLAMA <--> LLM
+                    end
+
+                    subgraph Step4 ["4. Application Layer (React 19)"]
+                        UI(Command Center UI):::ui
+                        MAP(Leaflet + TomTom GIS):::ui
+                        
+                        LLM -->|"Actionable Structured JSON (Diversions, Retiming)"| STREAM
+                        STREAM <-->|"WebSockets / Polling"| UI
+                        UI <-->|"OSRM Dynamic Routing"| MAP
+                    end
+            </div>
+        </section>
+
+        <!-- Technical Breakdown Cards -->
+        <section class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 hover:border-violet-500 transition-colors group">
+                <div class="w-10 h-10 rounded-full bg-violet-500/20 text-violet-400 flex items-center justify-center font-bold mb-4 group-hover:bg-violet-500 group-hover:text-white transition-colors">1</div>
+                <h3 class="text-lg font-bold text-zinc-100 mb-2">Computer Vision (Python)</h3>
+                <p class="text-sm text-zinc-400 leading-relaxed mb-4">
+                    Processes raw RTSP video streams. Utilizes YOLOv8 for object recognition (cars, buses, emergency vehicles) and optical flow mathematics to calculate speed density and collision risks.
+                </p>
+                <div class="mt-auto pt-4 border-t border-zinc-800 text-xs text-zinc-500 font-mono">cv_traffic_detection.py</div>
+            </div>
+
+            <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 hover:border-blue-500 transition-colors group">
+                <div class="w-10 h-10 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold mb-4 group-hover:bg-blue-500 group-hover:text-white transition-colors">2</div>
+                <h3 class="text-lg font-bold text-zinc-100 mb-2">Event Ingestion Engine</h3>
+                <p class="text-sm text-zinc-400 leading-relaxed mb-4">
+                    The core data fabric built on Node. It continually parses over 16,000 JSON payloads, tracking nominal traffic flows across Gandhinagar and flagging severity spikes.
+                </p>
+                <div class="mt-auto pt-4 border-t border-zinc-800 text-xs text-zinc-500 font-mono">src/utils/mockData.ts</div>
+            </div>
+
+            <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 hover:border-amber-500 transition-colors group">
+                <div class="w-10 h-10 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold mb-4 group-hover:bg-amber-500 group-hover:text-white transition-colors">3</div>
+                <h3 class="text-lg font-bold text-zinc-100 mb-2">AI Co-Pilot (Ollama)</h3>
+                <p class="text-sm text-zinc-400 leading-relaxed mb-4">
+                    When 3 or more critical events occur simultaneously, the data is pushed to a secure, locally-hosted Llama 3 API to generate dynamic diversions without relying on external cloud endpoints.
+                </p>
+                <div class="mt-auto pt-4 border-t border-zinc-800 text-xs text-zinc-500 font-mono">src/services/gemini.ts</div>
+            </div>
+
+            <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 hover:border-emerald-500 transition-colors group">
+                <div class="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold mb-4 group-hover:bg-emerald-500 group-hover:text-white transition-colors">4</div>
+                <h3 class="text-lg font-bold text-zinc-100 mb-2">Dashboard Interface</h3>
+                <p class="text-sm text-zinc-400 leading-relaxed mb-4">
+                    Uses React 19 to render real-time Leaflet maps. Displays bounding box outputs, LLM conversational intelligence, weather toggles, and multi-role operations natively on the web.
+                </p>
+                <div class="mt-auto pt-4 border-t border-zinc-800 text-xs text-zinc-500 font-mono">src/App.tsx</div>
+            </div>
+        </section>
+        
+        <footer class="text-center text-sm text-zinc-600 mt-12 mb-4">
+            Generated for Jury Presentation — Nexus Command © 2026.
+        </footer>
+    </div>
+</body>
+</html>
