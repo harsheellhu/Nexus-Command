@@ -4,15 +4,14 @@ import { TrafficEvent } from '../utils/mockData';
 const OLLAMA_ENDPOINT = (import.meta as any).env.VITE_OLLAMA_ENDPOINT || 'http://localhost:11434';
 const OLLAMA_MODEL = (import.meta as any).env.VITE_OLLAMA_MODEL || 'llama3';
 
-export async function generateIncidentRecommendations(events: TrafficEvent[]) {
-  if (events.length === 0) return null;
-
-  const criticalEvents = events.filter(e => e.isCritical);
-  if (criticalEvents.length === 0) return null;
+export async function generateIncidentRecommendations(context: string, weather: string) {
+  if (!context) return null;
 
   const prompt = `
     You are an AI Traffic Command Co-Pilot. Analyze the following critical events:
-    ${JSON.stringify(criticalEvents, null, 2)}
+    ${context}
+    
+    Current Weather Conditions: ${weather}
     
     Respond STRICTLY with a valid JSON object matching exactly this structure, no wrapping markdown, no explanations:
     {
@@ -55,10 +54,18 @@ export async function generateIncidentRecommendations(events: TrafficEvent[]) {
   }
 }
 
-export async function chatWithCopilot(query: string, context: any) {
+export async function chatWithCopilot(context: string, query: string, chatHistory: any[], weather: string) {
+  const historyText = chatHistory.map(m => `${m.role === 'user' ? 'Operator' : 'Co-Pilot'}: ${m.text}`).join('\n');
+
   const prompt = `
     You are the Nexus Traffic Command Co-Pilot. You assist officers running a city traffic grid.
-    Current System Context: ${JSON.stringify(context, null, 2)}
+    Current System Context:
+    ${context}
+
+    Current Weather Conditions: ${weather}
+    
+    Conversation History:
+    ${historyText}
     
     Operator Query: "${query}"
     

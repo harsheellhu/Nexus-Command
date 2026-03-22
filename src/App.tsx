@@ -38,6 +38,30 @@ const MOCK_LOCATIONS = [
   { name: 'Sector 11', coords: [23.2140, 72.6500] }
 ];
 
+const MOCK_RECOMMENDATIONS_DATA = {
+  summary: "Major collision detected at Kudasan Crossroad.",
+  diversionRoutes: [
+    { 
+      routeName: "Service Road Detour via Urjanagar", 
+      activationSequence: "Immediate", 
+      estimatedRedistribution: "High Load", 
+      coordinates: [[23.1885, 72.6285], [23.1985, 72.6285], [23.1985, 72.6385]] 
+    }
+  ],
+  signalRetiming: [
+    { 
+      intersection: "Kudasan Crossroad", 
+      currentPhase: "Phase 1 (N-S)", 
+      recommendedPhase: "Phase 3 (E-W)", 
+      reason: "Clear congested lanes on connecting arterial." 
+    }
+  ],
+  publicAlerts: {
+    vms: "COLLISION AHEAD - USE SERVICE ROAD",
+    socialMedia: "Traffic Alert: Major collision at Kudasan Crossroad. Emergency teams on site. Please use Urjanagar service road as a detour. #TrafficAlert"
+  }
+};
+
 function MapClickHandler({ isActive, onMapClick }: { isActive: boolean, onMapClick: (latlng: L.LatLng) => void }) {
   useMapEvents({
     click(e) {
@@ -73,6 +97,7 @@ export default function App() {
   const [navDest, setNavDest] = useState('');
   const [publicRoutingCoords, setPublicRoutingCoords] = useState<{source: [number,number], dest: [number,number]} | null>(null);
   const [isReportingMode, setIsReportingMode] = useState(false);
+  const [isMockIntelligence, setIsMockIntelligence] = useState(false);
 
   useEffect(() => {
     if (isDarkMode) {
@@ -427,7 +452,7 @@ Social Media: ${recommendations.publicAlerts?.socialMedia || 'N/A'}
 
       {/* Left Panel: Incident Feed (Admin Only) */}
       {userRole === 'admin' && (
-        <div className="w-80 border-r border-zinc-800 flex flex-col bg-zinc-900/50 backdrop-blur-sm z-10">
+        <div className="w-80 shrink-0 border-r border-zinc-800 flex flex-col bg-zinc-900/50 backdrop-blur-sm z-10">
           <div className="p-4 border-b border-zinc-800 flex items-center gap-3">
           <div className="p-2 bg-red-500/20 text-red-500 rounded-lg">
             <ShieldAlert size={20} />
@@ -514,7 +539,7 @@ Social Media: ${recommendations.publicAlerts?.socialMedia || 'N/A'}
       )}
 
       {/* Center Panel: Map & Cameras */}
-      <div className="flex-1 flex flex-col relative">
+      <div className="flex-1 flex flex-col relative min-w-0">
         <div className="flex-1 relative">
           <MapContainer 
           center={MAP_CENTER} 
@@ -630,7 +655,7 @@ Social Media: ${recommendations.publicAlerts?.socialMedia || 'N/A'}
 
       {/* Right Panel: Co-Pilot (Admin Only) */}
       {userRole === 'admin' && (
-        <div className="w-96 border-l border-zinc-800 flex flex-col bg-zinc-900/50 backdrop-blur-sm z-10">
+        <div className="w-96 shrink-0 border-l border-zinc-800 flex flex-col bg-zinc-900/50 backdrop-blur-sm z-10">
           <div className="p-4 border-b border-zinc-800 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Activity className="text-indigo-400" size={20} />
@@ -650,11 +675,23 @@ Social Media: ${recommendations.publicAlerts?.socialMedia || 'N/A'}
         <div className="flex-1 overflow-y-auto p-4 space-y-6">
           {/* Recommendations Section */}
           <div>
-            <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3 flex items-center gap-2">
-              <AlertTriangle size={14} /> Intelligence Brief
-            </h3>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider flex items-center gap-2">
+                <AlertTriangle size={14} /> Intelligence Brief
+              </h3>
+              <div className="flex items-center gap-2">
+                <span className={`text-[10px] ${!isMockIntelligence ? 'text-indigo-400 font-bold' : 'text-zinc-500'}`}>LLM</span>
+                <button
+                  onClick={() => setIsMockIntelligence(!isMockIntelligence)}
+                  className={`relative inline-flex h-4 w-8 items-center rounded-full transition-colors ${isMockIntelligence ? 'bg-amber-500' : 'bg-indigo-500'}`}
+                >
+                  <span className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${isMockIntelligence ? 'translate-x-4' : 'translate-x-1'}`} />
+                </button>
+                <span className={`text-[10px] ${isMockIntelligence ? 'text-amber-400 font-bold' : 'text-zinc-500'}`}>Mock</span>
+              </div>
+            </div>
             
-            {loadingRecs ? (
+            {loadingRecs && !isMockIntelligence ? (
               <div className="bg-zinc-800/30 border border-zinc-800 rounded-lg p-4 flex items-center justify-center">
                 <div className="animate-pulse flex items-center gap-2 text-indigo-400 text-sm">
                   <Activity size={16} className="animate-spin" /> Synthesizing data...
@@ -733,6 +770,87 @@ Social Media: ${recommendations.publicAlerts?.socialMedia || 'N/A'}
                       <span className="text-zinc-300">{recommendations.publicAlerts?.socialMedia}</span>
                       <button 
                         onClick={() => showToast("Social Media Alert Published")}
+                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 bg-rose-500 text-white px-2 py-1 rounded text-[10px] transition-opacity"
+                      >
+                        Publish
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : isMockIntelligence ? (
+              <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4">
+                {/* Mock Signal Re-timing */}
+                <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-3">
+                  <h4 className="text-sm font-medium text-amber-400 mb-2 flex items-center gap-2">
+                    <Clock size={14} /> Signal Re-timing
+                  </h4>
+                  <div className="space-y-2">
+                    {MOCK_RECOMMENDATIONS_DATA.signalRetiming.map((rec: any, i: number) => (
+                      <div key={i} className="text-xs bg-zinc-900/50 p-2 rounded border border-zinc-800">
+                        <div className="font-medium text-zinc-200">{rec.intersection}</div>
+                        <div className="flex items-center gap-2 mt-1 text-zinc-400">
+                          <span className="line-through">{rec.currentPhase}</span>
+                          <ArrowRight size={12} />
+                          <span className="text-emerald-400">{rec.recommendedPhase}</span>
+                        </div>
+                        <div className="mt-1 text-zinc-500">{rec.reason}</div>
+                        <button 
+                          onClick={() => showToast(`Applied mock timing to ${rec.intersection}`)}
+                          className="mt-2 w-full py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded border border-emerald-500/30 transition-colors text-[10px] flex items-center justify-center gap-1"
+                        >
+                          <CheckCircle2 size={10} /> Apply Timing
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Mock Diversion Routes */}
+                <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-3">
+                  <h4 className="text-sm font-medium text-blue-400 mb-2 flex items-center gap-2">
+                    <MapIcon size={14} /> Diversion Routes
+                  </h4>
+                  <div className="space-y-2">
+                    {MOCK_RECOMMENDATIONS_DATA.diversionRoutes.map((rec: any, i: number) => (
+                      <div key={i} className="text-xs bg-zinc-900/50 p-3 rounded border border-zinc-800">
+                        <div className="font-medium text-zinc-200">{rec.routeName}</div>
+                        <div className="mt-1 text-zinc-400">Seq: {rec.activationSequence}</div>
+                        <div className="mt-1 text-zinc-500 mb-2">Est. Load: {rec.estimatedRedistribution}</div>
+                        {rec.coordinates && rec.coordinates.length > 0 && (
+                          <button 
+                            onClick={() => handlePlotRoute(rec.coordinates, rec.routeName)}
+                            className="w-full py-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded border border-blue-500/30 transition-colors flex items-center justify-center gap-2"
+                          >
+                            <Navigation size={12} /> Plot on Map
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Mock Public Alerts */}
+                <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-3">
+                  <h4 className="text-sm font-medium text-rose-400 mb-2 flex items-center gap-2">
+                    <Radio size={14} /> Public Alerts
+                  </h4>
+                  <div className="space-y-2">
+                    <div className="text-xs bg-zinc-900/50 p-2 rounded border border-zinc-800 relative group">
+                      <span className="text-zinc-500 block mb-1">VMS Display:</span>
+                      <span className="font-mono text-amber-500">{MOCK_RECOMMENDATIONS_DATA.publicAlerts.vms}</span>
+                      <button 
+                        onClick={() => showToast("Mock VMS Alert Published")}
+                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 bg-rose-500 text-white px-2 py-1 rounded text-[10px] transition-opacity"
+                      >
+                        Publish
+                      </button>
+                    </div>
+                    <div className="text-xs bg-zinc-900/50 p-2 rounded border border-zinc-800 relative group">
+                      <span className="text-zinc-500 block mb-1">Social Media:</span>
+                      <span className="text-zinc-300">{MOCK_RECOMMENDATIONS_DATA.publicAlerts.socialMedia}</span>
+                      <button 
+                        onClick={() => showToast("Mock Social Media Alert Published")}
                         className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 bg-rose-500 text-white px-2 py-1 rounded text-[10px] transition-opacity"
                       >
                         Publish
