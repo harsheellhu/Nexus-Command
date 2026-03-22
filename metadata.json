@@ -1,0 +1,5 @@
+{
+  "name": "Traffic Incident Command Co-Pilot",
+  "description": "An LLM-powered incident co-pilot that ingests live traffic feeds and generates real-time intelligence including signal re-timing, diversion routes, and public alerts.",
+  "requestFramePermissions": []
+}
