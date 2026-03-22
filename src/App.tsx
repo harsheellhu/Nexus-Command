@@ -70,7 +70,16 @@ const MOCK_RECOMMENDATIONS_DATA = {
   publicAlerts: {
     vms: "COLLISION AHEAD - USE SERVICE ROAD",
     socialMedia: "Traffic Alert: Major collision at Kudasan Crossroad. Emergency teams on site. Please use Urjanagar service road as a detour. #TrafficAlert"
-  }
+  },
+  resourceDispatch: [
+    { unit: "Traffic Police Unit 4", status: "On Scene", action: "Establishing hard closure" },
+    { unit: "108 Ambulance", status: "En Route", action: "ETA 2 mins" },
+    { unit: "GMC Heavy Tow", status: "Dispatched", action: "Clearing center lanes" }
+  ],
+  infrastructureControls: [
+    { asset: "BRTS Lane (Kudasan-Sargasan)", action: "Open for Ambulances", status: "Active" },
+    { asset: "ATCS Speed Boards", action: "Lower to 40 km/h", status: "Pending" }
+  ]
 };
 
 function MapClickHandler({ isActive, onMapClick }: { isActive: boolean, onMapClick: (latlng: L.LatLng) => void }) {
@@ -884,6 +893,48 @@ Social Media: ${recommendations.publicAlerts?.socialMedia || 'N/A'}
                     </div>
                   </div>
                 </div>
+
+                {/* Mock Resource Dispatch */}
+                <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-3">
+                  <h4 className="text-sm font-medium text-emerald-400 mb-2 flex items-center gap-2">
+                    <Activity size={14} /> Resource Dispatch
+                  </h4>
+                  <div className="space-y-2">
+                    {MOCK_RECOMMENDATIONS_DATA.resourceDispatch.map((rec: any, i: number) => (
+                      <div key={i} className="text-xs bg-zinc-900/50 p-2 rounded border border-zinc-800">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-medium text-zinc-200">{rec.unit}</span>
+                          <span className={`px-1.5 py-0.5 rounded text-[10px] ${rec.status === 'On Scene' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'}`}>{rec.status}</span>
+                        </div>
+                        <div className="text-zinc-400">{rec.action}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Mock Infrastructure Controls */}
+                <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-3">
+                  <h4 className="text-sm font-medium text-purple-400 mb-2 flex items-center gap-2">
+                    <ShieldAlert size={14} /> Infrastructure Controls
+                  </h4>
+                  <div className="space-y-2">
+                    {MOCK_RECOMMENDATIONS_DATA.infrastructureControls.map((rec: any, i: number) => (
+                      <div key={i} className="text-xs bg-zinc-900/50 p-2 rounded border border-zinc-800 flex items-center justify-between group">
+                        <div>
+                          <div className="font-medium text-zinc-200">{rec.asset}</div>
+                          <div className="text-zinc-500 mt-1">Action: <span className="text-zinc-300">{rec.action}</span></div>
+                        </div>
+                        <button 
+                          onClick={() => showToast(`Infrastructure command sent to ${rec.asset}`)}
+                          className="px-2 py-1 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 rounded border border-purple-500/30 transition-colors"
+                        >
+                          {rec.status === 'Active' ? 'Configured' : 'Execute'}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
               </div>
             ) : (
               <div className="text-xs text-zinc-500 italic">

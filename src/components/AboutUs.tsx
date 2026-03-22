@@ -101,7 +101,7 @@ const TECH_STACK = [
   { name: 'Vite', color: 'bg-violet-500/20 text-violet-400 border-violet-500/30' },
   { name: 'Tailwind CSS v4', color: 'bg-teal-500/20 text-teal-400 border-teal-500/30' },
   { name: 'Leaflet Maps', color: 'bg-green-500/20 text-green-400 border-green-500/30' },
-  { name: 'Gemini AI', color: 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30' },
+  { name: 'Ollama LLM', color: 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30' },
   { name: 'OSRM Routing', color: 'bg-orange-500/20 text-orange-400 border-orange-500/30' },
   { name: 'TomTom Traffic', color: 'bg-red-500/20 text-red-400 border-red-500/30' },
 ];

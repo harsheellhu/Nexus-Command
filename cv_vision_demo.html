@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Command - Traffic Vision Engine Demo</title>
+    <style>
+        :root {
+            --bg-dark: #09090b;
+            --bg-panel: #18181b;
+            --border: #27272a;
+            --text-main: #f4f4f5;
+            --text-muted: #a1a1aa;
+            --accent: #6366f1;
+            --danger: #ef4444;
+            --success: #10b981;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 350px;
+            background-color: var(--bg-panel);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            box-sizing: border-box;
+            z-index: 10;
+        }
+
+        .header {
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 16px;
+        }
+
+        .header h1 {
+            font-size: 1.25rem;
+            margin: 0 0 4px 0;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .stat-box {
+            background-color: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+        }
+
+        .stat-box.danger {
+            background-color: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+        }
+        
+        .stat-box.danger .stat-value {
+            color: var(--danger);
+        }
+
+        .log-container {
+            flex: 1;
+            background-color: black;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            overflow-y: auto;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .log-entry { margin: 0; }
+        .log-entry.critical { color: var(--danger); font-weight: bold; }
+        .log-entry.success { color: var(--success); }
+
+        .video-container {
+            flex: 1;
+            position: relative;
+            background-image: url('https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&q=80&w=1600&h=900');
+            background-size: cover;
+            background-position: center;
+            overflow: hidden;
+        }
+
+        .video-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, transparent 20%, transparent 80%, rgba(0,0,0,0.6) 100%);
+            pointer-events: none;
+        }
+
+        .overlay-text {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-family: monospace;
+            color: #fff;
+            text-shadow: 1px 1px 2px black;
+            font-size: 14px;
+        }
+
+        /* Bounding Box Generation */
+        .bbox {
+            position: absolute;
+            border: 2px solid var(--success);
+            background-color: rgba(16, 185, 129, 0.1);
+            transition: all 0.3s linear;
+        }
+
+        .bbox span {
+            position: absolute;
+            top: -20px;
+            left: -2px;
+            background-color: var(--success);
+            color: black;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 2px 4px;
+            white-space: nowrap;
+        }
+
+        .bbox.anomaly {
+            border-color: var(--danger);
+            background-color: rgba(239, 68, 68, 0.2);
+            animation: pulse-danger 1s infinite alternate;
+        }
+        
+        .bbox.anomaly span {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        @keyframes pulse-danger {
+            from { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            to { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+        }
+
+        .radar-scan {
+            position: absolute;
+            height: 2px;
+            width: 100%;
+            background: rgba(99, 102, 241, 0.5);
+            box-shadow: 0 0 10px 2px rgba(99, 102, 241, 0.5);
+            animation: scan 4s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { top: 0; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="header">
+            <h1><span style="color: var(--accent)">●</span> Nexus Vision API</h1>
+            <div style="font-size: 0.75rem; color: var(--text-muted)">YOLOv8 Real-Time Inference Stream</div>
+        </div>
+
+        <div class="stat-grid">
+            <div class="stat-box">
+                <div class="stat-label">Frame ID</div>
+                <div class="stat-value" id="val-frame">1042</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Active BBoxes</div>
+                <div class="stat-value" id="val-count">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Avg Speed</div>
+                <div class="stat-value" id="val-speed">45 <span style="font-size: 0.5em; color: var(--text-muted)">KM/H</span></div>
+            </div>
+            <div class="stat-box" id="box-status">
+                <div class="stat-label">Flow Status</div>
+                <div class="stat-value" id="val-status">NOMINAL</div>
+            </div>
+        </div>
+
+        <div class="stat-label" style="margin-bottom: 8px;">Inference Pipeline Logs</div>
+        <div class="log-container" id="terminal">
+            <p class="log-entry">Loading YOLOv8 weights: nexus_traffic_yolov8.pt</p>
+            <p class="log-entry success">Model loaded successfully. [CUDA: True]</p>
+            <p class="log-entry">Opening RTSP stream: camera_gandhinagar_kudasan...</p>
+        </div>
+    </div>
+
+    <div class="video-container" id="viewfinder">
+        <div class="video-overlay"></div>
+        <div class="overlay-text">
+            NEXUS OPTICAL ENGINE v1.2<br>
+            CAM: KUDASAN-01 [1080p, 60FPS]<br>
+            NET: YOLOv8x-p6
+        </div>
+        <div class="radar-scan"></div>
+        <!-- Bounding boxes will be injected here via JS -->
+    </div>
+
+    <script>
+        const terminal = document.getElementById('terminal');
+        const countEl = document.getElementById('val-count');
+        const speedEl = document.getElementById('val-speed');
+        const frameEl = document.getElementById('val-frame');
+        const statusEl = document.getElementById('val-status');
+        const boxStatus = document.getElementById('box-status');
+        const viewfinder = document.getElementById('viewfinder');
+
+        let frameId = 1042;
+        let vehicles = [];
+        const classes = ['car', 'car', 'car', 'bus', 'truck', 'motorcycle'];
+
+        function addLog(text, type = '') {
+            const p = document.createElement('p');
+            p.className = `log-entry ${type}`;
+            p.textContent = `[${new Date().toISOString().split('T')[1].slice(0,11)}] ${text}`;
+            terminal.appendChild(p);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        function createVehicle() {
+            const isAnomaly = Math.random() < 0.05; // 5% chance of crash/anomaly
+            const vClass = classes[Math.floor(Math.random() * classes.length)];
+            const conf = (Math.random() * 0.15 + 0.84).toFixed(2); // 0.84-0.99
+            
+            // Random start pos
+            let x, y, width, height, dx, dy;
+            
+            // Traffic mostly moves down and slightly diagonally
+            x = Math.random() * 80; // 0-80% left
+            y = 20 + Math.random() * 20; // 20-40% top
+            width = 3 + Math.random() * 4; // 3-7% width
+            height = width * 0.8; // Aspect ratio
+            
+            dx = (Math.random() - 0.2) * 1.5; // slight X movement
+            dy = 1 + Math.random() * 2; // steady Y movement (moving closer)
+
+            const box = document.createElement('div');
+            box.className = `bbox ${isAnomaly ? 'anomaly' : ''}`;
+            
+            const label = document.createElement('span');
+            label.textContent = isAnomaly ? 'COLLISION_RISK 0.99' : `${vClass} ${conf}`;
+            box.appendChild(label);
+            
+            viewfinder.appendChild(box);
+
+            return { el: box, x, y, width, height, dx, dy, isAnomaly, vClass, speed: 20 + Math.random() * 60, id: Math.floor(Math.random()*10000) };
+        }
+
+        setInterval(() => {
+            frameId++;
+            frameEl.textContent = frameId;
+
+            // Spawn new vehicles periodically
+            if (vehicles.length < 15 && Math.random() < 0.3) {
+                vehicles.push(createVehicle());
+            }
+
+            let avgSpeed = 0;
+            let criticalDetected = false;
+
+            // Move vehicles
+            for (let i = vehicles.length - 1; i >= 0; i--) {
+                const v = vehicles[i];
+                
+                // If it's an anomaly, it shouldn't move
+                if (!v.isAnomaly) {
+                    v.x += v.dx;
+                    v.y += v.dy;
+                    // as it comes closer, it gets bigger
+                    v.width *= 1.01;
+                    v.height *= 1.01;
+                } else {
+                    criticalDetected = true;
+                }
+                
+                // Update DOM
+                v.el.style.left = `${v.x}%`;
+                v.el.style.top = `${v.y}%`;
+                v.el.style.width = `${v.width}%`;
+                v.el.style.height = `${v.height}%`;
+
+                avgSpeed += v.speed;
+
+                // Remove bounds
+                if (v.y > 100 || v.x < -10 || v.x > 110 || (v.isAnomaly && Math.random() < 0.02)) {
+                    v.el.remove();
+                    vehicles.splice(i, 1);
+                }
+            }
+
+            const count = vehicles.length;
+            countEl.textContent = count;
+            
+            if (count > 0) {
+                speedEl.innerHTML = `${Math.floor(avgSpeed / count)} <span style="font-size: 0.5em; color: var(--text-muted)">KM/H</span>`;
+            }
+
+            // Status Logic
+            if (criticalDetected) {
+                statusEl.textContent = "CRITICAL";
+                boxStatus.className = "stat-box danger";
+                if(Math.random() < 0.2) addLog("CRITICAL COLLISION ANOMALY DETECTED IN FRAME", "critical");
+            } else if (count > 10) {
+                statusEl.textContent = "CONGESTION";
+                boxStatus.className = "stat-box";
+                if(Math.random() < 0.1) addLog(`Density threshold exceeded. Triggering analytics event.`);
+            } else {
+                statusEl.textContent = "NOMINAL";
+                boxStatus.className = "stat-box";
+                if(Math.random() < 0.05) addLog(`Frame ${frameId}: Extracted ${count} valid tensor objects.`);
+            }
+
+        }, 100); // 10 FPS update
+    </script>
+</body>
+</html>
