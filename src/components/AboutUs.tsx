@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldAlert, Activity, Navigation, MapPin, Cpu, Users, Zap, ArrowLeft, Github, Globe, Mail } from 'lucide-react';
+import { ShieldAlert, Activity, Navigation, MapPin, Cpu, Users, Zap, ArrowLeft, Github, Globe, Mail, Star } from 'lucide-react';
 
 interface AboutUsProps {
   onBack: () => void;
@@ -8,22 +8,39 @@ interface AboutUsProps {
 
 const TEAM_MEMBERS = [
   {
-    name: 'Harsheel Lhukanji',
-    role: 'Lead Developer',
-    avatar: 'HL',
+    name: 'Harshil Bhat',
+    role: 'Team Lead | UI/UX Designer',
+    avatar: 'HB',
     color: 'from-indigo-500 to-violet-600',
+    isLead: true,
   },
   {
-    name: 'Nexus AI Core',
-    role: 'AI Intelligence Engine',
-    avatar: 'AI',
+    name: 'Ved Sharma',
+    role: 'Backend & API Developer',
+    avatar: 'VS',
     color: 'from-emerald-500 to-teal-600',
+    isLead: false,
   },
   {
-    name: 'Command Ops',
-    role: 'Operations & Design',
-    avatar: 'CO',
+    name: 'Harshil Patel',
+    role: 'Backend Support Engineer',
+    avatar: 'HP',
+    color: 'from-blue-500 to-cyan-600',
+    isLead: false,
+  },
+  {
+    name: 'Kavya Chaudhary',
+    role: 'Penetration Tester & Security Analyst',
+    avatar: 'KC',
+    color: 'from-rose-500 to-pink-600',
+    isLead: false,
+  },
+  {
+    name: 'Ansh Agarwal',
+    role: 'Product Designer (Figma)',
+    avatar: 'AA',
     color: 'from-amber-500 to-orange-600',
+    isLead: false,
   },
 ];
 
@@ -245,21 +262,26 @@ export default function AboutUs({ onBack, isDarkMode }: AboutUsProps) {
       <section className="relative z-10 py-16 px-6 border-t border-zinc-800/50">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-10">
-            <h2 className="text-2xl font-bold text-zinc-100 mb-3">The Team</h2>
-            <p className="text-zinc-500 text-sm">The minds behind Nexus Command.</p>
+            <h2 className="text-2xl font-bold text-zinc-100 mb-3">Team Codeem Code</h2>
+            <p className="text-zinc-500 text-sm">Team ID: 35 · Domain: Smart Transportation · PS3 — LLM Co-Pilot for Traffic Incident Command</p>
           </div>
 
-          <div className="grid sm:grid-cols-3 gap-6 max-w-2xl mx-auto">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-5 max-w-4xl mx-auto">
             {TEAM_MEMBERS.map((member, i) => (
               <div
                 key={i}
-                className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-6 text-center backdrop-blur-sm hover:border-zinc-700 transition-colors"
+                className={`bg-zinc-900/60 border rounded-xl p-5 text-center backdrop-blur-sm hover:border-zinc-700 transition-colors relative ${member.isLead ? 'border-indigo-500/40 ring-1 ring-indigo-500/20' : 'border-zinc-800'}`}
               >
-                <div className={`w-16 h-16 rounded-full bg-gradient-to-br ${member.color} flex items-center justify-center text-white font-bold text-lg mx-auto mb-4 shadow-lg`}>
+                {member.isLead && (
+                  <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-indigo-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-lg">
+                    <Star size={8} fill="currentColor" /> LEAD
+                  </div>
+                )}
+                <div className={`w-14 h-14 rounded-full bg-gradient-to-br ${member.color} flex items-center justify-center text-white font-bold text-sm mx-auto mb-3 shadow-lg`}>
                   {member.avatar}
                 </div>
                 <h3 className="font-semibold text-zinc-200 text-sm">{member.name}</h3>
-                <p className="text-xs text-zinc-500 mt-1">{member.role}</p>
+                <p className="text-[11px] text-zinc-500 mt-1 leading-snug">{member.role}</p>
               </div>
             ))}
           </div>
@@ -269,12 +291,20 @@ export default function AboutUs({ onBack, isDarkMode }: AboutUsProps) {
       {/* Footer */}
       <footer className="relative z-10 border-t border-zinc-800/50 py-12 px-6">
         <div className="max-w-5xl mx-auto">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div className="flex flex-col items-center gap-6">
             <div className="flex items-center gap-3">
               <div className="p-1.5 bg-indigo-500/15 text-indigo-400 rounded-lg border border-indigo-500/20">
                 <ShieldAlert size={16} />
               </div>
               <span className="text-sm font-medium text-zinc-400">Nexus Command</span>
+            </div>
+
+            <div className="flex items-center gap-4 text-xs text-zinc-500">
+              <span>AETRIX Hackathon 2026</span>
+              <div className="h-3 w-px bg-zinc-800" />
+              <span>March 2026</span>
+              <div className="h-3 w-px bg-zinc-800" />
+              <span>Gandhinagar, Gujarat</span>
             </div>
 
             <div className="flex items-center gap-4">
@@ -290,7 +320,7 @@ export default function AboutUs({ onBack, isDarkMode }: AboutUsProps) {
             </div>
 
             <p className="text-xs text-zinc-600">
-              © {new Date().getFullYear()} Nexus Command. All rights reserved.
+              © {new Date().getFullYear()} Team Codeem Code · Nexus Command. All rights reserved.
             </p>
           </div>
         </div>
