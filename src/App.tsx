@@ -76,8 +76,8 @@ function MapClickHandler({ isActive, onMapClick }: { isActive: boolean, onMapCli
 
 export default function App() {
   const ALL_DATA = useMemo(() => generateMassiveDataset(), []);
-  const [events, setEvents] = useState<TrafficEvent[]>(ALL_DATA.slice(0, 7850));
-  const [streamIndex, setStreamIndex] = useState(7850);
+  const [events, setEvents] = useState<TrafficEvent[]>(ALL_DATA.slice(0, 16350));
+  const [streamIndex, setStreamIndex] = useState(16350);
   const [recommendations, setRecommendations] = useState<any>(null);
   const [loadingRecs, setLoadingRecs] = useState(false);
   const [chatHistory, setChatHistory] = useState<{role: 'user' | 'assistant', text: string}[]>([]);

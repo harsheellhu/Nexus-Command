@@ -40,8 +40,8 @@ export function generateMassiveDataset(): TrafficEvent[] {
   let baseTime = new Date();
   baseTime.setHours(4, 0, 0, 0);
 
-  // Generate 8000 background events
-  for (let i = 0; i < 8000; i++) {
+  // Generate 16500 background events
+  for (let i = 0; i < 16500; i++) {
     baseTime = new Date(baseTime.getTime() + Math.random() * 2000 + 500);
     data.push({
       time: baseTime.toTimeString().split(' ')[0],
@@ -52,9 +52,9 @@ export function generateMassiveDataset(): TrafficEvent[] {
     });
   }
 
-  // Inject critical events near the end (starting at index 7855, spaced out by 12 events)
+  // Inject critical events near the end (starting at index 16355, spaced out by 12 events)
   let criticalIndex = 0;
-  for (let i = 7855; i < 7950; i += 12) {
+  for (let i = 16355; i < 16450; i += 12) {
     if (criticalIndex < CRITICAL_EVENTS.length) {
       data[i] = CRITICAL_EVENTS[criticalIndex];
       criticalIndex++;

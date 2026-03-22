@@ -196,7 +196,7 @@ export default function AboutUs({ onBack, isDarkMode }: AboutUsProps) {
             <div className="grid grid-cols-2 gap-4">
               {[
                 { value: '< 2s', label: 'Incident Detection', color: 'text-emerald-400' },
-                { value: '8000+', label: 'Events Processed', color: 'text-indigo-400' },
+                { value: '16,000+', label: 'Events Processed', color: 'text-indigo-400' },
                 { value: '3', label: 'User Roles', color: 'text-blue-400' },
                 { value: '24/7', label: 'Active Monitoring', color: 'text-amber-400' },
               ].map((stat, i) => (
