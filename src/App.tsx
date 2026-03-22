@@ -36,7 +36,17 @@ const MOCK_LOCATIONS = [
   { name: 'GIFT City', coords: [23.1610, 72.6840] },
   { name: 'PDEU Road', coords: [23.1670, 72.6360] },
   { name: 'Infocity', coords: [23.1930, 72.6460] },
-  { name: 'Sector 11', coords: [23.2140, 72.6500] }
+  { name: 'Sector 11', coords: [23.2140, 72.6500] },
+  { name: 'Pathika Ashram (ST Stand)', coords: [23.2180, 72.6540] },
+  { name: 'Vidhan Sabha', coords: [23.2155, 72.6640] },
+  { name: 'GH-5 Circle', coords: [23.2185, 72.6631] },
+  { name: 'CH-3 Circle', coords: [23.2135, 72.6450] },
+  { name: 'Sector 1', coords: [23.2382, 72.6394] },
+  { name: 'Sector 21 Market', coords: [23.2307, 72.6534] },
+  { name: 'Sector 30', coords: [23.2505, 72.6713] },
+  { name: 'Pethapur Crossroads', coords: [23.2685, 72.6520] },
+  { name: 'Randesan', coords: [23.1765, 72.6330] },
+  { name: 'Bhaijipura Crossroad', coords: [23.1812, 72.6541] }
 ];
 
 const MOCK_RECOMMENDATIONS_DATA = {

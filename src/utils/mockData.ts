@@ -28,13 +28,25 @@ export const IMPACT_LINES = [
 
 export function generateMassiveDataset(): TrafficEvent[] {
   const data: TrafficEvent[] = [];
-  const SOURCES = ['Sensor KUD-01', 'Sensor SAR-02', 'Camera GC-05', 'Camera PD-02', '108 Dispatch', 'Traffic Police', 'GMC VMS', 'Google Maps API', 'GSRTC Auth', 'Traffic Cam 04', 'Sensor BH-03'];
+  const SOURCES = [
+    'Sensor KUD-01', 'Sensor SAR-02', 'Camera GC-05', 'Camera PD-02', 
+    '108 Dispatch', 'Traffic Police', 'GMC VMS', 'Google Maps API', 
+    'GSRTC Auth', 'Traffic Cam 04', 'Sensor BH-03', 'Sector 21 Cam', 
+    'GH-5 Sensor', 'Pathika Ashram VMS', 'Vidhan Sabha Cam', 'Sector 1 Cam', 
+    'Sector 30 Sensor', 'Pethapur Checkpost', 'CH-3 Sensor'
+  ];
   const MESSAGES = [
-    'Traffic volume nominal on SG Highway.', 'Average speed 40 km/h near GIFT City.', 'Average speed 35 km/h at Sargasan.', 'Average speed 45 km/h near PDEU.',
-    'No anomalies detected at Bhaijipura.', 'Pedestrian volume high at Kudasan crosswalk.', 'BRTS lane clear.',
-    'Minor congestion cleared near Infocity.', 'Routine patrol active on CH Road.', 'Signal cycle normal at Raksha Shakti.',
+    'Traffic volume nominal on SG Highway.', 'Average speed 40 km/h near GIFT City.', 
+    'Average speed 35 km/h at Sargasan.', 'Average speed 45 km/h near PDEU.',
+    'No anomalies detected at Bhaijipura.', 'Pedestrian volume high at Kudasan crosswalk.', 
+    'BRTS lane clear.', 'Minor congestion cleared near Infocity.', 
+    'Routine patrol active on CH Road.', 'Signal cycle normal at Raksha Shakti.',
     'System heartbeat OK.', 'Camera feed stable.', 'VMS displaying default safety message.',
-    'Intersection clear at K-7.', 'Flow rate steady at 800 veh/hr.', 'Weather conditions optimal, visibility clear.'
+    'Intersection clear at K-7.', 'Flow rate steady at 800 veh/hr.', 
+    'Weather conditions optimal, visibility clear.', 'Average speed 50 km/h at GH-5.',
+    'Heavy pedestrian traffic at Pathika Ashram.', 'Normal flow near Vidhan Sabha.',
+    'No congestion at Sector 21 market.', 'Clear visibility at Pethapur.',
+    'Traffic police unit deployed at Sector 1.', 'Sector 30 round-about flowing smoothly.'
   ];
 
   let baseTime = new Date();
