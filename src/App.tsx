@@ -4,6 +4,7 @@ import { AlertTriangle, Radio, MessageSquare, Map as MapIcon, Activity, ArrowRig
 import { generateIncidentRecommendations, chatWithCopilot } from './services/gemini';
 import { generateMassiveDataset, TrafficEvent, IMPACT_LINES } from './utils/mockData';
 import RoutingMachine from './components/RoutingMachine';
+import AboutUs from './components/AboutUs';
 import L from 'leaflet';
 
 // Fix Leaflet icon issue
@@ -98,6 +99,7 @@ export default function App() {
   const [publicRoutingCoords, setPublicRoutingCoords] = useState<{source: [number,number], dest: [number,number]} | null>(null);
   const [isReportingMode, setIsReportingMode] = useState(false);
   const [isMockIntelligence, setIsMockIntelligence] = useState(false);
+  const [showAboutUs, setShowAboutUs] = useState(false);
 
   useEffect(() => {
     if (isDarkMode) {
@@ -316,6 +318,10 @@ Social Media: ${recommendations.publicAlerts?.socialMedia || 'N/A'}
   const currentImpactLevel = events.length > 0 ? Math.max(...events.filter(e => e.isCritical).map(e => e.impact), 0) : 0;
   const visibleImpactLines = IMPACT_LINES.slice(0, currentImpactLevel);
 
+  if (showAboutUs) {
+    return <AboutUs onBack={() => setShowAboutUs(false)} isDarkMode={isDarkMode} />;
+  }
+
   if (userRole === null) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-zinc-950 text-zinc-100 font-sans p-4 relative overflow-hidden">
@@ -366,6 +372,16 @@ Social Media: ${recommendations.publicAlerts?.socialMedia || 'N/A'}
                 <Navigation size={16} className="text-blue-400" /> Public User
               </div>
               <div className="text-xs text-zinc-500">View-only mode for global traffic maps and confirmed public alerts.</div>
+            </button>
+          </div>
+
+          {/* About Us Link */}
+          <div className="mt-6 text-center">
+            <button
+              onClick={() => setShowAboutUs(true)}
+              className="text-xs text-zinc-500 hover:text-indigo-400 transition-colors underline underline-offset-4 decoration-zinc-700 hover:decoration-indigo-500/50"
+            >
+              About Us
             </button>
           </div>
         </div>
