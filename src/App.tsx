@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, ZoomCon
 import { AlertTriangle, Radio, MessageSquare, Map as MapIcon, Activity, ArrowRight, Clock, ShieldAlert, Send, CheckCircle2, Navigation, Flame, Download, Mic, MicOff, Sun, Moon, CloudRain, CloudFog, Volume2, VolumeX } from 'lucide-react';
 import { generateIncidentRecommendations, chatWithCopilot } from './services/gemini';
 import { generateMassiveDataset, TrafficEvent, IMPACT_LINES } from './utils/mockData';
+import { trafficEngine } from './services/rerouteService';
 import RoutingMachine from './components/RoutingMachine';
 import AboutUs from './components/AboutUs';
 import L from 'leaflet';
@@ -98,6 +99,8 @@ export default function App() {
   const [events, setEvents] = useState<TrafficEvent[]>(ALL_DATA.slice(0, 16350));
   const [streamIndex, setStreamIndex] = useState(16350);
   const [recommendations, setRecommendations] = useState<any>(null);
+  const [activeRerouteInfo, setActiveRerouteInfo] = useState<{path: string[], distance: number} | null>(null);
+  const [llmDiversionMessage, setLlmDiversionMessage] = useState<string | null>(null);
   const [loadingRecs, setLoadingRecs] = useState(false);
   const [chatHistory, setChatHistory] = useState<{role: 'user' | 'assistant', text: string}[]>([]);
   const [chatInput, setChatInput] = useState('');
@@ -195,6 +198,22 @@ export default function App() {
             const criticalCount = ALL_DATA.slice(0, prev + 1).filter(e => e.isCritical).length;
             if (criticalCount === 3) {
               fetchRecommendations(ALL_DATA.slice(0, prev + 1));
+            }
+          }
+          if (nextEvent.action?.type === 'ROAD_CLOSED') {
+            const [from, to] = nextEvent.action.edge;
+            trafficEngine.closeRoad(from, to);
+            
+            // Re-calc explicit demo route
+            const reroute = trafficEngine.dijkstraReroute('Kudasan-Cross', 'GIFT-City'); 
+            if (reroute) {
+              setActiveRerouteInfo({ path: reroute.path, distance: reroute.distance });
+              setActiveRoute(reroute.polyline as [number, number][]);
+              
+              const promptMsg = `Suggest a human-friendly short 1-sentence diversion message for drivers. The road between ${trafficEngine.getIntersectionName(from)} and ${trafficEngine.getIntersectionName(to)} is closed. New route: ${reroute.path.map(trafficEngine.getIntersectionName).join(' -> ')}.`;
+              chatWithCopilot('', promptMsg, [], weather).then(reply => {
+                setLlmDiversionMessage(reply);
+              });
             }
           }
           return prev + 1;
@@ -644,6 +663,36 @@ Social Media: ${recommendations.publicAlerts?.socialMedia || 'N/A'}
             <RoutingMachine source={publicRoutingCoords.source} destination={publicRoutingCoords.dest} />
           )}
         </MapContainer>
+
+        {/* Active Reroute Banner */}
+        {activeRerouteInfo && (
+          <div className="absolute top-20 left-1/2 -translate-x-1/2 z-[1000] w-full max-w-2xl animate-in fade-in slide-in-from-top-8">
+            <div className="bg-red-900/90 border-2 border-red-500 rounded-xl p-4 shadow-2xl backdrop-blur-md">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-red-500 rounded-full animate-pulse">
+                  <ShieldAlert size={24} className="text-white" />
+                </div>
+                <div className="flex-1">
+                  <h2 className="text-lg font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                    🚨 ROAD CLOSED – REROUTING ACTIVATED
+                  </h2>
+                  <div className="mt-1 text-red-100 font-medium">
+                    New path: {activeRerouteInfo.path.map(p => trafficEngine.getIntersectionName(p)).join(' → ')} 
+                    <span className="ml-2 px-2 py-0.5 bg-red-950/50 rounded-md text-sm whitespace-nowrap">
+                      ({activeRerouteInfo.distance.toFixed(1)} km, +{Math.round(activeRerouteInfo.distance * 1.5)} min)
+                    </span>
+                  </div>
+                  {llmDiversionMessage && (
+                    <div className="mt-2 text-sm text-red-200 bg-red-950/40 p-2 rounded flex items-start gap-2 border border-red-800/50">
+                      <MessageSquare size={14} className="mt-0.5 shrink-0" />
+                      <span className="italic">{llmDiversionMessage}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Floating Map Overlay (Admin & Responder) */}
         {userRole !== 'public' && (

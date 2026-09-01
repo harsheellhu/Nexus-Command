@@ -11,6 +11,7 @@ Note: This is currently in active development (placeholder logic for repository)
 import cv2
 import numpy as np
 import time
+import json
 # import torch
 # from ultralytics import YOLO
 
@@ -59,8 +60,8 @@ class TrafficVisionEngine:
         detected_vehicles = np.random.randint(2, 15)
         avg_speed = np.random.uniform(20.0, 75.0)
         
-        # Simulated critical conditions
-        has_accident = np.random.random() < 0.05
+        # Simulated critical conditions (bumped frequency for testing)
+        has_accident = np.random.random() < 0.15
         
         return {
             "timestamp": time.time(),
@@ -90,10 +91,12 @@ if __name__ == "__main__":
             mock_frame = np.zeros((720, 1280, 3), dtype=np.uint8) 
             
             results = engine.analyze_frame(mock_frame)
-            print(f"Frame {frame_id:04d} | Count: {results['vehicle_count']:02d} | Avg Speed: {results['average_speed_kmh']} km/h | Status: {results['flow_status']}")
             
             if results["anomalies_detected"]:
-                print(f" [!] CRITICAL ANOMALY: {results['anomalies_detected'][0]} detected!")
+                # The user requested exactly this JSON output
+                print(json.dumps({ "roadId": "Kudasan-Cross", "status": "CLOSED", "reason": "Accident" }))
+            else:
+                print(f"Frame {frame_id:04d} | Count: {results['vehicle_count']:02d} | Avg Speed: {results['average_speed_kmh']} km/h | Status: {results['flow_status']}")
                 
     except KeyboardInterrupt:
         print("\n[INFO] Stream terminated by user.")

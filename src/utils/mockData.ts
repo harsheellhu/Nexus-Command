@@ -4,14 +4,18 @@ export interface TrafficEvent {
   message: string;
   impact: number;
   isCritical: boolean;
+  action?: {
+    type: 'ROAD_CLOSED';
+    edge: [string, string];
+  };
 }
 
 export const CRITICAL_EVENTS: TrafficEvent[] = [
   { time: '08:14:22', source: 'Sensor KUD-01', message: 'Sudden speed drop detected on Kudasan-Sargasan Road.', impact: 1, isCritical: true },
   { time: '08:15:05', source: '108 Dispatch', message: 'Multiple calls reporting collision near Kudasan Crossroad.', impact: 1, isCritical: true },
-  { time: '08:16:12', source: 'Camera SG-12', message: 'Visual confirmation: Multi-vehicle pileup, 2 lanes blocked towards Sargasan.', impact: 2, isCritical: true },
+  { time: '08:16:12', source: 'Camera SG-12', message: 'Visual confirmation: Multi-vehicle pileup, 2 lanes blocked towards Sargasan.', impact: 2, isCritical: true, action: { type: 'ROAD_CLOSED', edge: ['Kudasan-Cross', 'Sargasan-Cross'] } },
   { time: '08:18:30', source: 'Traffic Police', message: 'Unit 4 on scene. Requesting ambulance and heavy tow. Closing 3 lanes.', impact: 3, isCritical: true },
-  { time: '08:20:45', source: 'Sensor SAR-02', message: 'Severe backup extending past Sargasan Crossroad.', impact: 4, isCritical: true },
+  { time: '08:20:45', source: 'Sensor SAR-02', message: 'Severe backup extending past Sargasan Crossroad.', impact: 4, isCritical: true, action: { type: 'ROAD_CLOSED', edge: ['Sargasan-Cross', 'CH-3'] } },
   { time: '08:23:10', source: 'Fire Dept', message: 'Rescue team on scene. Extrication required.', impact: 4, isCritical: true },
   { time: '08:26:00', source: 'EMS', message: 'Two ambulances on scene. Preparing for transport to Civil Hospital.', impact: 4, isCritical: true },
   { time: '08:30:15', source: 'Traffic Police', message: 'Establishing hard closure at Kudasan. Diverting traffic to PDEU and GIFT City.', impact: 5, isCritical: true },
@@ -62,6 +66,18 @@ export function generateMassiveDataset(): TrafficEvent[] {
       impact: 0,
       isCritical: false
     });
+
+    // Every 120 events (~30 seconds at 4 events/sec), trigger a random road closure
+    if (i % 120 === 0 && i < 16200) {
+      data.push({
+        time: baseTime.toTimeString().split(' ')[0],
+        source: 'Automated Diagnostic',
+        message: 'System detects sudden blockage, initiating reroute protocol.',
+        impact: 1,
+        isCritical: true,
+        action: { type: 'ROAD_CLOSED', edge: ['Infocity', 'Kudasan-Cross'] }
+      });
+    }
   }
 
   // Inject critical events near the end (starting at index 16355, spaced out by 12 events)
